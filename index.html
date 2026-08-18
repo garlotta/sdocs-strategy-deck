@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S-Docs — Platform Strategy (Wireframe v2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ============================================================
+     TOKENS — edit here to reskin the whole deck
+     ============================================================ */
+  :root {
+    --green-dark: #0d5e4b;
+    --green-accent: #17c588;
+    --green-soft: rgba(13, 94, 75, 0.08);
+    --green-border: rgba(13, 94, 75, 0.12);
+    --dark: #1a2332;
+    --dark-card: rgba(255,255,255,0.05);
+    --dark-border: rgba(255,255,255,0.07);
+    --light-bg: #f4f5f2;
+    --light-card: #ffffff;
+    --light-border: rgba(0,0,0,0.07);
+    --text-primary: #1a2332;
+    --text-secondary: #556270;
+    --white: #ffffff;
+
+    /* wireframe-only tokens */
+    --wf-stroke: rgba(255,255,255,0.34);
+    --wf-fill:   rgba(255,255,255,0.08);
+    --wf-fill-2: rgba(255,255,255,0.14);
+    --wf-text:   rgba(255,255,255,0.72);
+    --wf-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #e8e6e1;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ---- Deck shell (scales to fit the window) ---- */
+  .stage { width: 1440px; height: 810px; transform-origin: center center; }
+
+  .deck {
+    position: relative;
+    width: 1440px;
+    height: 810px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.18);
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 52px 64px;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  /* ---- Top bar ---- */
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px; flex-shrink: 0;
+  }
+  .slide.dark  .brand { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.3); letter-spacing: 1.5px; text-transform: uppercase; }
+  .slide.dark  .slide-number { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.2); }
+  .slide.light .brand { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.22); letter-spacing: 1.5px; text-transform: uppercase; }
+  .slide.light .slide-number { font-size: 12px; font-weight: 500; color: rgba(0,0,0,0.15); }
+
+  /* ---- Themes ---- */
+  .slide.dark  { background: var(--dark); }
+  .slide.light { background: var(--light-bg); }
+  .slide.dark  h1 { font-size: 46px; font-weight: 800; color: var(--white); letter-spacing: -1.4px; line-height: 1.1; }
+  .slide.light h1 { font-size: 46px; font-weight: 800; color: var(--text-primary); letter-spacing: -1.4px; line-height: 1.1; }
+
+  .slide-title { flex-shrink: 0; }
+  .slide-kicker {
+    font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--green-accent); margin-bottom: 12px;
+  }
+  .slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+  .header-with-badge { display: flex; justify-content: space-between; align-items: baseline; flex-shrink: 0; }
+  .badge { font-size: 15px; font-weight: 700; color: var(--green-accent); letter-spacing: 0.3px; }
+
+  /* ============================================================
+     SLIDE 1 — Title
+     ============================================================ */
+  .title-center { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+  .title-center h1 { font-size: 64px; font-weight: 800; letter-spacing: -2px; line-height: 1.05; max-width: 1000px; }
+  .title-subtitle { font-size: 24px; font-weight: 500; color: rgba(255,255,255,0.45); line-height: 1.4; max-width: 820px; }
+  .title-meta { margin-top: 28px; display: flex; gap: 32px; }
+  .title-meta span { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ============================================================
+     SLIDE 2 — Three columns of boxes (headline + body)
+     ============================================================ */
+  .col3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-content: stretch; }
+  .col3.fill { flex: 1; }
+
+  .box {
+    background: var(--light-card); border: 1px solid var(--light-border);
+    border-radius: 14px; padding: 36px 32px;
+    display: flex; flex-direction: column; align-self: stretch;
+  }
+  .box-num { font-size: 14px; font-weight: 700; color: var(--green-dark); margin-bottom: 14px; }
+  .box-head { font-size: 27px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.6px; line-height: 1.15; margin-bottom: 16px; }
+  .box-body { font-size: 17px; color: var(--text-secondary); line-height: 1.55; }
+  .box-body + .box-body { margin-top: 12px; }
+  .box-stat { font-size: 27px; font-weight: 800; color: var(--green-dark); letter-spacing: -0.6px; margin-bottom: 8px; }
+  .box-source { margin-top: auto; padding-top: 18px; font-size: 13px; color: rgba(0,0,0,0.32); font-style: italic; }
+
+  /* dark variant of the same box */
+  .slide.dark .box { background: var(--dark-card); border-color: var(--dark-border); }
+  .slide.dark .box-num { color: var(--green-accent); }
+  .slide.dark .box-head { color: var(--white); }
+  .slide.dark .box-body { color: rgba(255,255,255,0.6); }
+
+  /* ============================================================
+     SLIDE 3 — Position statement + 3 columns + full-width footer
+     ============================================================ */
+  .position-statement {
+    text-align: center; font-size: 30px; font-weight: 700; line-height: 1.35;
+    color: var(--white); letter-spacing: -0.6px; max-width: 1080px; margin: 0 auto 34px;
+  }
+  .position-statement em { color: var(--green-accent); font-style: normal; }
+  .span-note {
+    margin-top: 26px; text-align: center; font-size: 19px; line-height: 1.5;
+    color: rgba(255,255,255,0.55); border-top: 1px solid var(--dark-border); padding-top: 24px;
+  }
+  .span-note strong { color: var(--white); font-weight: 700; }
+
+  /* ============================================================
+     SLIDE 4 — Competitive topography 2x2
+     ============================================================ */
+  .matrix-wrap { display: grid; grid-template-columns: 1fr 340px; gap: 36px; align-items: stretch; }
+
+  .matrix {
+    position: relative; background: var(--light-card); border: 1px solid var(--light-border);
+    border-radius: 14px; height: 470px;
+  }
+  .matrix-quad { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .matrix-quad > div { border-right: 1px dashed rgba(0,0,0,0.10); border-bottom: 1px dashed rgba(0,0,0,0.10); }
+  .matrix-quad > div:nth-child(2n) { border-right: none; }
+  .matrix-quad > div:nth-child(n+3) { border-bottom: none; }
+  .quad-label {
+    position: absolute; font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: rgba(0,0,0,0.18);
+  }
+  .matrix-hi {
+    position: absolute; top: 0; right: 0; width: 50%; height: 50%;
+    background: rgba(23,197,136,0.09); border: 1px dashed rgba(13,94,75,0.35); border-radius: 0 14px 0 0;
+  }
+
+  .matrix-frame { position: relative; padding: 0 0 32px 32px; }
+  .axis-y { position: absolute; left: 0; top: 0; bottom: 32px; width: 32px; display: flex; align-items: center; justify-content: center; }
+  .axis-y span { transform: rotate(-90deg); white-space: nowrap; font-size: 11px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: var(--text-secondary); }
+  .axis-x { position: absolute; left: 32px; right: 0; bottom: 0; height: 32px; display: flex; align-items: center; justify-content: space-between;
+            font-size: 11px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: var(--text-secondary); }
+
+  .dot-plot { position: absolute; inset: 0; }
+  .vendor { position: absolute; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 9px; }
+  .vendor .pip { width: 13px; height: 13px; border-radius: 50%; background: var(--text-secondary); opacity: 0.55; flex-shrink: 0; }
+  .vendor .vlabel { font-size: 13px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; line-height: 1.25; }
+  .vendor.flip { flex-direction: row-reverse; }
+  .vendor.ours .pip { width: 20px; height: 20px; background: var(--green-accent); opacity: 1; box-shadow: 0 0 0 6px rgba(23,197,136,0.20); }
+  .vendor.ours .vlabel { font-size: 16px; font-weight: 800; color: var(--green-dark); }
+
+  .matrix-side { display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+  .side-item { background: var(--light-card); border: 1px solid var(--light-border); border-radius: 11px; padding: 15px 17px; }
+  .side-item.accent { border-left: 4px solid var(--green-accent); }
+  .side-head { font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 5px; letter-spacing: -0.2px; }
+  .side-body { font-size: 13.5px; color: var(--text-secondary); line-height: 1.45; }
+
+  /* ============================================================
+     SLIDE 5 — Concentric rings
+     ============================================================ */
+  .rings-wrap { display: grid; grid-template-columns: 520px 1fr; gap: 56px; align-items: center; }
+  .rings { position: relative; width: 500px; height: 500px; margin: 0 auto; }
+  .ring {
+    position: absolute; border-radius: 50%; display: flex; align-items: flex-start;
+    justify-content: center; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  }
+  .ring-3 { width: 500px; height: 500px; background: rgba(23,197,136,0.07);  border: 1px dashed rgba(255,255,255,0.18); }
+  .ring-2 { width: 350px; height: 350px; background: rgba(23,197,136,0.11); border: 1px dashed rgba(255,255,255,0.24); }
+  .ring-1 { width: 200px; height: 200px; background: rgba(23,197,136,0.20); border: 1px solid var(--green-accent); align-items: center; }
+  .ring-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+    color: rgba(255,255,255,0.55); margin-top: 16px;
+  }
+  .ring-1 .ring-tag { margin-top: 0; color: var(--white); font-size: 13px; text-align: center; line-height: 1.5; }
+
+  .rings-legend { display: flex; flex-direction: column; gap: 20px; }
+  .legend-item { border-left: 3px solid var(--green-accent); padding-left: 20px; }
+  .legend-item.dim { border-left-color: rgba(255,255,255,0.22); }
+  .legend-head { font-size: 22px; font-weight: 800; color: var(--white); letter-spacing: -0.3px; margin-bottom: 7px; }
+  .legend-body { font-size: 16.5px; color: rgba(255,255,255,0.58); line-height: 1.5; }
+
+  /* ============================================================
+     SLIDE 6 — Stacked stage blocks (50% width)
+     ============================================================ */
+  .stack-half { width: 50%; margin: 0 auto; display: flex; flex-direction: column; gap: 7px; }
+  .stage-row {
+    background: var(--light-card); border: 1px solid var(--light-border); border-left: 4px solid var(--green-accent);
+    border-radius: 11px; padding: 12px 24px; display: grid; grid-template-columns: 34px 1fr; gap: 16px; align-items: center;
+  }
+  .stage-num {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--green-soft);
+    color: var(--green-dark); font-size: 13px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stage-name { font-size: 19px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
+  .stage-desc { font-size: 15px; color: var(--text-secondary); line-height: 1.35; margin-top: 2px; }
+  .stack-caption { width: 50%; margin: 0 auto 12px; text-align: center; font-size: 16px; color: var(--text-secondary); font-style: italic; }
+
+  /* ============================================================
+     SLIDES 7-10 — Vignette: 50/50 content left, visual right
+     ============================================================ */
+  .slide.vig-slide { padding: 0; }
+  .slide.vig-slide .top-bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 5;
+    padding: 40px 64px; margin: 0; pointer-events: none;
+  }
+  .slide.vig-slide .brand { color: rgba(0,0,0,0.22); }
+  .slide.vig-slide .slide-number { color: rgba(255,255,255,0.35); }
+  .vignette { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+
+  .vig-left {
+    background: var(--white); padding: 48px 52px 48px 64px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .vig-pillar {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--green-dark); margin-bottom: 14px;
+  }
+  .vig-left h2 { font-size: 38px; font-weight: 800; color: var(--text-primary); letter-spacing: -1px; line-height: 1.12; margin-bottom: 22px; }
+  .vig-points { display: flex; flex-direction: column; gap: 16px; }
+  .vig-point { font-size: 17px; color: var(--text-secondary); line-height: 1.5; padding-left: 18px; position: relative; }
+  .vig-point::before { content:''; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--green-accent); }
+  .vig-point strong { color: var(--text-primary); font-weight: 700; }
+  .vig-sub { margin-top: 6px; display: flex; flex-direction: column; gap: 7px; padding-left: 18px; }
+  .vig-sub div { font-size: 14.5px; color: var(--text-secondary); line-height: 1.4; }
+  .vig-sub b { color: var(--text-primary); font-weight: 700; }
+
+  .vig-right {
+    background: var(--green-dark); padding: 44px 48px;
+    display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  }
+
+  /* ============================================================
+     WIREFRAME PRIMITIVES — swap these for real art later
+     ============================================================ */
+  .wf-title {
+    font-family: var(--wf-mono); font-size: 10px; font-weight: 700; letter-spacing: 1.6px;
+    text-transform: uppercase; color: rgba(255,255,255,0.40); margin-bottom: 4px;
+  }
+  .wf-box {
+    border: 1px dashed var(--wf-stroke); background: var(--wf-fill);
+    border-radius: 8px; padding: 12px 14px;
+  }
+  .wf-box.solid { border-style: solid; background: var(--wf-fill-2); }
+  .wf-box.ghost { background: transparent; }
+  .wf-label {
+    font-family: var(--wf-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.6px;
+    color: var(--wf-text); text-transform: uppercase;
+  }
+  .wf-sub { font-family: var(--wf-mono); font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.42); margin-top: 4px; }
+  .wf-line { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.16); margin-top: 7px; }
+  .wf-line.s { width: 45%; } .wf-line.m { width: 70%; } .wf-line.l { width: 92%; }
+  .wf-arrow { text-align: center; font-size: 13px; color: rgba(255,255,255,0.35); line-height: 1; margin: -2px 0; }
+  .wf-row { display: flex; gap: 10px; }
+  .wf-row > * { flex: 1; }
+  .wf-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .wf-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+  .wf-caption {
+    font-family: var(--wf-mono); font-size: 10px; letter-spacing: 0.8px; color: rgba(255,255,255,0.35);
+    margin-top: 10px; text-align: center; text-transform: uppercase;
+  }
+  .wf-pill {
+    display: inline-block; font-family: var(--wf-mono); font-size: 9.5px; font-weight: 700;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--green-accent);
+    border: 1px solid rgba(23,197,136,0.5); border-radius: 20px; padding: 3px 9px;
+  }
+  .wf-gate { border-color: var(--green-accent); background: rgba(23,197,136,0.14); }
+  .wf-loop { border: 1px dashed rgba(23,197,136,0.55); border-radius: 12px; padding: 14px; }
+
+  /* ---- Navigation ---- */
+  .nav-arrows { position: fixed; bottom: 26px; right: 34px; display: flex; gap: 8px; z-index: 100; }
+  .nav-btn {
+    width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15);
+    background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); color: var(--text-primary);
+    font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.95); }
+  .slide-dots { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); display: flex; gap: 9px; z-index: 100; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.15); transition: all 0.2s; cursor: pointer; }
+  .dot.active { background: var(--green-dark); transform: scale(1.3); }
+  .hint {
+    position: fixed; bottom: 30px; left: 34px; z-index: 100;
+    font-family: var(--wf-mono); font-size: 10px; letter-spacing: 0.8px; color: rgba(0,0,0,0.28); text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+<div class="deck">
+
+  <!-- ============================================================
+       SLIDE 1 — TITLE
+       ============================================================ -->
+  <div class="slide dark active">
+    <div class="top-bar"><div class="brand">S-Docs</div></div>
+    <div class="title-center">
+      <h1>Beyond Salesforce First</h1>
+      <div class="title-subtitle">An open, multi-data-source platform for AI-driven document workflows across every system the enterprise runs.</div>
+      <div class="title-meta">
+        <span>Platform Strategy</span>
+        <span>v2 — Wireframe</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDE 2 — THE PROBLEM
+       Layout: full screen, 3 columns, 1 box per column (headline + body)
+       ============================================================ -->
+  <div class="slide light">
+    <div class="top-bar"><div class="brand">S-Docs</div><div class="slide-number">02</div></div>
+    <div class="slide-title">
+      <div class="slide-kicker">The Problem</div>
+      <h1>Why “Salesforce First” Isn’t Enough</h1>
+    </div>
+    <div class="slide-content">
+      <div class="col3">
+
+        <div class="box">
+          <div class="box-num">01</div>
+          <div class="box-head">The floor has moved</div>
+          <p class="box-body">Doc gen and e-signature are no longer differentiators. Every CLM, IDP, and horizontal AI assistant now ships a version.</p>
+          <p class="box-body">What used to be the product is now table stakes bundled into someone else’s platform.</p>
+        </div>
+
+        <div class="box">
+          <div class="box-num">02</div>
+          <div class="box-head">Single-ecosystem exposure</div>
+          <p class="box-body">Being tied to one ecosystem leaves us exposed if that platform absorbs or displaces the function.</p>
+          <p class="box-body">Consolidation risk isn’t hypothetical — it’s the stated roadmap of every major suite vendor.</p>
+        </div>
+
+        <div class="box">
+          <div class="box-num">03</div>
+          <div class="box-stat">957 apps. 27% connected.</div>
+          <p class="box-body">The average enterprise runs nearly a thousand applications and has integrated barely a quarter of them. No single platform owns how work actually moves — including Salesforce.</p>
+          <div class="box-source">MuleSoft 2026 Connectivity Benchmark</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDE 3 — THE SHIFT
+       Layout: position statement centered across top, 3 columns below,
+               stickiness line spanning all three at the bottom
+       ============================================================ -->
+  <div class="slide dark">
+    <div class="top-bar"><div class="brand">S-Docs</div><div class="slide-number">03</div></div>
+    <div class="slide-content">
+      <div class="slide-kicker" style="text-align:center;">The Shift — An Open, Multi-Data-Source Platform</div>
+      <div class="position-statement">
+        S-Docs orchestrates <em>AI-driven document workflows</em> across disparate enterprise applications.
+      </div>
+
+      <div class="col3">
+        <div class="box">
+          <div class="box-num">Pillar 01</div>
+          <div class="box-head">Agentic Orchestration</div>
+          <p class="box-body">Coordinating multi-step document workflows across systems — autonomous within approved guardrails, with human gates on consequential actions.</p>
+        </div>
+        <div class="box">
+          <div class="box-num">Pillar 02</div>
+          <div class="box-head">Document Intelligence</div>
+          <p class="box-body">Documents become inputs that can be read, reasoned against, and acted on — not just artifacts that get produced and filed.</p>
+        </div>
+        <div class="box">
+          <div class="box-num">Pillar 03</div>
+          <div class="box-head">Surface Independent</div>
+          <p class="box-body">Agents are first-class users. Everything is invokable via the web, MCP/API, and LLM/chatbots.</p>
+        </div>
+      </div>
+
+      <div class="span-note">
+        This is what creates product stickiness — <strong>the more systems the platform touches, the more valuable the solution and the harder it becomes to replace.</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDE 4 — COMPETITIVE DIFFERENTIATION
+       Layout: 2x2 "Competitive Topography Matrix" with plotted dots (spectrum,
+               not four labeled boxes) + supporting notes rail on the right.
+       Edit a vendor's position by changing its inline left/top percentages.
+       ============================================================ -->
+  <div class="slide light">
+    <div class="top-bar"><div class="brand">S-Docs</div><div class="slide-number">04</div></div>
+    <div class="header-with-badge">
+      <div class="slide-title">
+        <div class="slide-kicker">Competitive Differentiation</div>
+        <h1>Competitive Topography Matrix</h1>
+      </div>
+      <div class="badge">No incumbent owns full-lifecycle agentic documents across ecosystems</div>
+    </div>
+    <div class="slide-content">
+      <div class="matrix-wrap">
+
+        <div class="matrix-frame">
+          <div class="axis-y"><span>Narrow Modality ← → Full Lifecycle</span></div>
+          <div class="axis-x"><div>Ecosystem Locked</div><div>Open &amp; Extensible (any API, any database)</div></div>
+
+          <div class="matrix">
+            <div class="matrix-quad"><div></div><div></div><div></div><div></div></div>
+            <div class="matrix-hi"></div>
+            <div class="quad-label" style="top:16px; left:52.5%;">Whitespace</div>
+
+            <div class="dot-plot">
+              <!-- Horizontal Ecosystem Giants: full lifecycle, locked -->
+              <div class="vendor" style="left:16%; top:16%;"><div class="pip"></div><div class="vlabel">Microsoft Copilot</div></div>
+              <div class="vendor" style="left:24%; top:29%;"><div class="pip"></div><div class="vlabel">Salesforce Agentforce 360</div></div>
+
+              <!-- Agreement Platforms: full lifecycle, fixed named integrations -->
+              <div class="vendor" style="left:36%; top:41%;"><div class="pip"></div><div class="vlabel">Ironclad</div></div>
+              <div class="vendor" style="left:32%; top:52%;"><div class="pip"></div><div class="vlabel">Icertis</div></div>
+              <div class="vendor" style="left:46%; top:23%;"><div class="pip"></div><div class="vlabel">Docusign IAM</div></div>
+
+              <!-- Cross-ecosystem generation / governance framing -->
+              <div class="vendor" style="left:55%; top:63%;"><div class="pip"></div><div class="vlabel">Templafy</div></div>
+              <div class="vendor" style="left:72%; top:52%;"><div class="pip"></div><div class="vlabel">Norm Ai</div></div>
+
+              <!-- Extraction Specialists: narrow modality, partially open -->
+              <div class="vendor" style="left:56%; top:79%;"><div class="pip"></div><div class="vlabel">Klarity</div></div>
+              <div class="vendor" style="left:68%; top:88%;"><div class="pip"></div><div class="vlabel">Hyperscience</div></div>
+              <div class="vendor" style="left:70%; top:71%;"><div class="pip"></div><div class="vlabel">Instabase</div></div>
+
+              <!-- Native Baselines: the in-bundle floor -->
+              <div class="vendor" style="left:14%; top:84%;"><div class="pip"></div><div class="vlabel">Salesforce Omnistudio<br>Document Generation</div></div>
+
+              <!-- Ours -->
+              <div class="vendor ours flip" style="left:88%; top:11%;"><div class="pip"></div><div class="vlabel" style="text-align:right;">S-Docs</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="matrix-side">
+          <div class="side-item accent">
+            <div class="side-head">S-Docs — the whitespace</div>
+            <div class="side-body">Full lifecycle, hundreds of connectors, custom integration to any API or customer database, and regulated-industry-ready.</div>
+          </div>
+          <div class="side-item">
+            <div class="side-head">Docusign validates the demand</div>
+            <div class="side-body">Recently added multiple data sources (SF, HubSpot, SAP, Dynamics, Slack) with IAM. High on lifecycle, only partway along reach — that gap is the argument.</div>
+          </div>
+          <div class="side-item">
+            <div class="side-head">Templafy</div>
+            <div class="side-body">Cross-ecosystem document agents (M365 / Google / Salesforce), Sept 2025. Generation-and-branding, not extraction-and-action. No regulated-vertical playbooks.</div>
+          </div>
+          <div class="side-item">
+            <div class="side-head">Norm Ai</div>
+            <div class="side-body">Closest conceptual rival on regulated-vertical + governance framing.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDE 5 — WHY THIS IS OURS TO TAKE
+       Layout: three concentric rings (governance core → skill packs →
+               cross-system reach) with a labeled legend at right.
+       ============================================================ -->
+  <div class="slide dark">
+    <div class="top-bar"><div class="brand">S-Docs</div><div class="slide-number">05</div></div>
+    <div class="slide-title">
+      <div class="slide-kicker">Why This Is Ours To Take</div>
+      <h1>Where complex document work becomes <span style="color:var(--green-accent)">provable</span></h1>
+      <div style="margin-top:10px; font-size:20px; color:rgba(255,255,255,0.45);">…in every system the enterprise runs.</div>
+    </div>
+    <div class="slide-content">
+      <div class="rings-wrap">
+
+        <div class="rings">
+          <div class="ring ring-3"><div class="ring-tag">Cross-System Agnosticism</div></div>
+          <div class="ring ring-2"><div class="ring-tag">Regulated-Vertical Skill Packs</div></div>
+          <div class="ring ring-1"><div class="ring-tag">Immutable<br>Audit Trail<br>&amp; Governance</div></div>
+        </div>
+
+        <div class="rings-legend">
+          <div class="legend-item">
+            <div class="legend-head">Core — Immutable Audit Trail &amp; Governance</div>
+            <div class="legend-body">SOC 2, ISO/IEC 42001 alignment, NIST AI RMF mapping, fine-grained RBAC, mandatory human-in-the-loop.</div>
+          </div>
+          <div class="legend-item dim">
+            <div class="legend-head">Middle — Regulated-Vertical Skill Packs</div>
+            <div class="legend-body">Encoded compliance playbooks tailored to financial services, healthcare, legal, and public-sector mandates.</div>
+          </div>
+          <div class="legend-item dim">
+            <div class="legend-head">Outer — Cross-System Agnosticism</div>
+            <div class="legend-body">Not locked to one CRM. Native execution across Salesforce, HubSpot and ServiceNow, plus hundreds of connectors and custom integration to any API or customer database.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDE 6 — THE AGENTIC FRAMEWORK
+       Layout: stacked blocks top-to-bottom, 50% of screen width.
+       ============================================================ -->
+  <div class="slide light">
+    <div class="top-bar"><div class="brand">S-Docs</div><div class="slide-number">06</div></div>
+    <div class="slide-title" style="text-align:center;">
+      <div class="slide-kicker">The Framework</div>
+      <h1>Seven Stages, One Chain</h1>
+    </div>
+    <div class="slide-content" style="justify-content:flex-start; padding-top:10px;">
+      <div class="stack-caption">Every workflow on the platform is assembled from these stages.</div>
+      <div class="stack-half">
+        <div class="stage-row"><div class="stage-num">1</div><div><div class="stage-name">Ingest</div><div class="stage-desc">Centralizing intake</div></div></div>
+        <div class="stage-row"><div class="stage-num">2</div><div><div class="stage-name">Extract</div><div class="stage-desc">Intelligent harvesting</div></div></div>
+        <div class="stage-row"><div class="stage-num">3</div><div><div class="stage-name">Analyze</div><div class="stage-desc">Deriving intelligence</div></div></div>
+        <div class="stage-row"><div class="stage-num">4</div><div><div class="stage-name">Save</div><div class="stage-desc">Harmonizing data</div></div></div>
+        <div class="stage-row"><div class="stage-num">5</div><div><div class="stage-name">Generate</div><div class="stage-desc">Creating outbound</div></div></div>
+        <div class="stage-row"><div class="stage-num">6</div><div><div class="stage-name">E-Signature</div><div class="stage-desc">Finalizing capture</div></div></div>
+        <div class="stage-row"><div class="stage-num">7</div><div><div class="stage-name">Notify</div><div class="stage-desc">Routing to the right human or channel</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDE 7 — VIGNETTE 1: BUILD A WORKFLOW
+       Layout: content left (white), wireframe visual right (solid green)
+       VISUAL INTENT: a chain of configurable primitive blocks, with a
+       palette of available blocks alongside — "never a black box."
+       ============================================================ -->
+  <div class="slide light vig-slide">
+    <div class="top-bar"><div class="brand">S-Docs</div><div class="slide-number">07</div></div>
+    <div class="vignette">
+
+      <div class="vig-left">
+        <div class="vig-pillar">Vignette 01 · Document Intelligence</div>
+        <h2>Build a Workflow</h2>
+        <div class="vig-points">
+          <div class="vig-point"><strong>Chainable primitives.</strong> Workflows are made of configurable blocks — Extract, Analyze, Generate, Save, Notify — that you mix and match into a single workflow. Never a black box.</div>
+          <div class="vig-point"><strong>Worked example:</strong> inbound contract → Extract fields → Analyze against compliance playbook → Generate variance scorecard → Notify Legal via Slack for approval.</div>
+        </div>
+      </div>
+
+      <div class="vig-right">
+        <div class="wf-title">Wireframe — workflow builder</div>
+        <div class="wf-row" style="gap:14px; align-items:stretch;">
+
+          <!-- left: block palette -->
+          <div style="flex:0 0 130px; display:flex; flex-direction:column; gap:7px;">
+            <div class="wf-sub" style="margin:0 0 2px;">Block palette</div>
+            <div class="wf-box ghost" style="padding:7px 10px;"><div class="wf-label">Ingest</div></div>
+            <div class="wf-box ghost" style="padding:7px 10px;"><div class="wf-label">Extract</div></div>
+            <div class="wf-box ghost" style="padding:7px 10px;"><div class="wf-label">Analyze</div></div>
+            <div class="wf-box ghost" style="padding:7px 10px;"><div class="wf-label">Generate</div></div>
+            <div class="wf-box ghost" style="padding:7px 10px;"><div class="wf-label">Save</div></div>
+            <div class="wf-box ghost" style="padding:7px 10px;"><div class="wf-label">Notify</div></div>
+          </div>
+
+          <!-- right: assembled chain -->
+          <div style="flex:1; display:flex; flex-direction:column; gap:0;">
+            <div class="wf-sub" style="margin:0 0 6px;">Assembled workflow</div>
+            <div class="wf-box solid"><div class="wf-label">Ingest · Inbound contract</div><div class="wf-line l"></div></div>
+            <div class="wf-arrow">↓</div>
+            <div class="wf-box solid"><div class="wf-label">Extract · Fields</div><div class="wf-line m"></div></div>
+            <div class="wf-arrow">↓</div>
+            <div class="wf-box solid"><div class="wf-label">Analyze · Compliance playbook</div><div class="wf-line l"></div></div>
+            <div class="wf-arrow">↓</div>
+            <div class="wf-box solid"><div class="wf-label">Generate · Variance scorecard</div><div class="wf-line m"></div></div>
+            <div class="wf-arrow">↓</div>
+            <div class="wf-box solid wf-gate"><div class="wf-label">Notify · Legal via Slack</div><div class="wf-sub">Approval gate</div></div>
+          </div>
+
+        </div>
+        <div class="wf-caption">Config panel per block — every step inspectable</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDE 8 — VIGNETTE 2: INDUSTRY AGENTS
+       Layout: content left (white), wireframe visual right (solid green)
+       VISUAL INTENT: a gallery/marketplace grid of pre-built vertical
+       agents, each card showing the skills bundled inside it.
+       ============================================================ -->
+  <div class="slide light vig-slide">
+    <div class="top-bar"><div class="brand">S-Docs</div><div class="slide-number">08</div></div>
+    <div class="vignette">
+
+      <div class="vig-left">
+        <div class="vig-pillar">Vignette 02 · Agentic Orchestration</div>
+        <h2>Industry Agents</h2>
+        <div class="vig-points">
+          <div class="vig-point"><strong>Pre-built, industry-specific agents</strong> that dramatically reduce time-to-value — and open the door to a partner network building specialized industry agents.</div>
+          <div class="vig-point"><strong>Regulated “skills” out of the box.</strong> Agents access ready-made playbooks, extraction schemas, data sources, and document generation rules that guide specific actions.</div>
+          <div class="vig-sub">
+            <div><b>Financial Services</b> — KYC/AML Triage, Loan Underwriting Support, Regulatory Reporting</div>
+            <div><b>Healthcare &amp; Life Sciences</b> — Prior Auth Intake, Patient Intake Extraction, HIPAA-aware Vendor/BAA Compliance</div>
+            <div><b>Public Sector</b> — Benefits Eligibility Determination, FOIA Request Triage, Grant Compliance Review</div>
+            <div><b>Legal &amp; Operations</b> — Case Intake / I-140 Preparation, Passport ID Extractor, IP Protection Scorecard, Resume Extractor</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vig-right">
+        <div class="wf-title">Wireframe — agent gallery</div>
+        <div class="wf-grid2">
+          <div class="wf-box"><div class="wf-label">Financial Services</div><div class="wf-sub">3 agents · 12 skills</div><div class="wf-line l"></div><div class="wf-line m"></div></div>
+          <div class="wf-box"><div class="wf-label">Healthcare &amp; LS</div><div class="wf-sub">3 agents · 09 skills</div><div class="wf-line l"></div><div class="wf-line s"></div></div>
+          <div class="wf-box"><div class="wf-label">Public Sector</div><div class="wf-sub">3 agents · 11 skills</div><div class="wf-line m"></div><div class="wf-line l"></div></div>
+          <div class="wf-box"><div class="wf-label">Legal &amp; Ops</div><div class="wf-sub">4 agents · 14 skills</div><div class="wf-line l"></div><div class="wf-line m"></div></div>
+        </div>
+
+        <div class="wf-box ghost" style="margin-top:6px;">
+          <div class="wf-sub" style="margin:0 0 8px;">Inside one agent</div>
+          <div class="wf-grid3">
+            <div class="wf-box solid" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Playbook</div></div>
+            <div class="wf-box solid" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Schema</div></div>
+            <div class="wf-box solid" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Data source</div></div>
+            <div class="wf-box solid" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Doc rules</div></div>
+            <div class="wf-box solid" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Guardrails</div></div>
+            <div class="wf-box solid" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Audit</div></div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:4px;">
+          <span class="wf-pill">Partner-built</span>
+          <span class="wf-pill">Installable</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDE 9 — VIGNETTE 3: AD-HOC TASKS
+       Layout: content left (white), wireframe visual right (solid green)
+       VISUAL INTENT: before/after contrast — scattered manual sources
+       above vs a single agent-run flow with an audit log below.
+       ============================================================ -->
+  <div class="slide light vig-slide">
+    <div class="top-bar"><div class="brand">S-Docs</div><div class="slide-number">09</div></div>
+    <div class="vignette">
+
+      <div class="vig-left">
+        <div class="vig-pillar">Vignette 03 · Agent Callable</div>
+        <h2>Ad-Hoc Tasks</h2>
+        <div class="vig-points">
+          <div class="vig-point"><strong>Create a proposal.</strong> Agents can be invoked manually or triggered by external events — a Slack-based contract/proposal workflow started informally, not through a rigid pipeline.</div>
+          <div class="vig-point"><strong>The old way (fragmented systems):</strong> copy-pasting CRM data, sifting Slack logs for side-deals, pulling transcript details, risking compliance and version errors → slower deal velocity, high error rates, zero document trail.</div>
+          <div class="vig-point"><strong>With the platform (autonomous multi-system agent):</strong> auto-collects across Slack, CRM and transcripts, drafts bespoke proposals, and keeps a full audit log of exactly why, what and when — with guardrails that keep a human in final control.</div>
+        </div>
+      </div>
+
+      <div class="vig-right">
+        <div class="wf-title">Wireframe — before / after</div>
+
+        <div class="wf-box ghost">
+          <div class="wf-sub" style="margin:0 0 9px;">Old way — manual assembly</div>
+          <div class="wf-grid3">
+            <div class="wf-box" style="padding:9px 10px; opacity:0.65;"><div class="wf-label" style="font-size:9.5px;">CRM</div></div>
+            <div class="wf-box" style="padding:9px 10px; opacity:0.65;"><div class="wf-label" style="font-size:9.5px;">Slack</div></div>
+            <div class="wf-box" style="padding:9px 10px; opacity:0.65;"><div class="wf-label" style="font-size:9.5px;">Transcripts</div></div>
+          </div>
+          <div class="wf-caption" style="margin-top:9px; text-align:left;">copy → paste → hope · no trail</div>
+        </div>
+
+        <div class="wf-arrow" style="margin:2px 0;">↓</div>
+
+        <div class="wf-box solid">
+          <div class="wf-sub" style="margin:0 0 9px;">With the platform — one agent run</div>
+          <div class="wf-row" style="gap:8px;">
+            <div class="wf-box ghost" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Collect</div></div>
+            <div class="wf-box ghost" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Draft</div></div>
+            <div class="wf-box ghost" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Check</div></div>
+            <div class="wf-box ghost wf-gate" style="padding:8px 9px;"><div class="wf-label" style="font-size:9.5px;">Human OK</div></div>
+          </div>
+        </div>
+
+        <div class="wf-box" style="margin-top:4px;">
+          <div class="wf-sub" style="margin:0 0 7px;">Audit log — why / what / when</div>
+          <div class="wf-line l"></div><div class="wf-line l"></div><div class="wf-line m"></div>
+        </div>
+
+        <div class="wf-caption">Triggered from Slack · invokable via MCP / API</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDE 10 — VIGNETTE 4: AUTONOMOUS LOOPS
+       Layout: content left (white), wireframe visual right (solid green)
+       VISUAL INTENT: a closed loop that runs unprompted and terminates
+       at a human approve/reject gate, which feeds back into the loop.
+       ============================================================ -->
+  <div class="slide light vig-slide">
+    <div class="top-bar"><div class="brand">S-Docs</div><div class="slide-number">10</div></div>
+    <div class="vignette">
+
+      <div class="vig-left">
+        <div class="vig-pillar">Vignette 04 · Orchestration + Document Intelligence</div>
+        <h2>Autonomous Loops</h2>
+        <div class="vig-points">
+          <div class="vig-point"><strong>Agents that proactively prompt users to act</strong>, rather than waiting to be invoked.</div>
+          <div class="vig-point"><strong>The Insurance Policy Review Agent:</strong> ingests a sub-contractor agreement → extracts insurance limits → analyzes against a standard policy playbook → flags when limits fall below threshold → notifies a human-in-the-loop approve/reject gate.</div>
+        </div>
+      </div>
+
+      <div class="vig-right">
+        <div class="wf-title">Wireframe — autonomous loop</div>
+
+        <div class="wf-loop">
+          <div class="wf-sub" style="margin:0 0 9px;">Runs on schedule / on arrival — no human trigger</div>
+          <div class="wf-box solid"><div class="wf-label">Ingest · Sub-contractor agreement</div></div>
+          <div class="wf-arrow">↓</div>
+          <div class="wf-box solid"><div class="wf-label">Extract · Insurance limits</div></div>
+          <div class="wf-arrow">↓</div>
+          <div class="wf-box solid"><div class="wf-label">Analyze · Standard policy playbook</div></div>
+          <div class="wf-arrow">↓</div>
+          <div class="wf-box solid"><div class="wf-label">Flag · Limits below threshold</div><div class="wf-sub">Threshold rule configurable</div></div>
+          <div class="wf-arrow">↓</div>
+          <div class="wf-box solid wf-gate">
+            <div class="wf-label">Notify · Human gate</div>
+            <div style="display:flex; gap:7px; margin-top:8px;">
+              <span class="wf-pill">Approve</span><span class="wf-pill">Reject</span>
+            </div>
+          </div>
+          <div class="wf-caption" style="margin-top:9px;">↺ decision returns to the loop</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- Navigation -->
+<div class="nav-arrows">
+  <button class="nav-btn" onclick="go(-1)">&#8592;</button>
+  <button class="nav-btn" onclick="go(1)">&#8594;</button>
+</div>
+<div class="slide-dots" id="dots"></div>
+<div class="hint">← → to navigate</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function buildDots() {
+    const c = document.getElementById('dots');
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goTo(i);
+      c.appendChild(d);
+    });
+  }
+
+  function goTo(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = i;
+    slides[current].classList.add('active');
+    document.querySelectorAll('.dot').forEach((d, idx) => d.classList.toggle('active', idx === current));
+    if (history.replaceState) history.replaceState(null, '', '#' + (current + 1));
+  }
+
+  function go(dir) { goTo(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); go(1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')  { e.preventDefault(); go(-1); }
+  });
+
+  // Scale the 1440x810 stage to fit the window so slides never crop while editing
+  function fit() {
+    const s = Math.min((window.innerWidth - 48) / 1440, (window.innerHeight - 48) / 810, 1);
+    document.getElementById('stage').style.transform = 'scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+
+  buildDots();
+  fit();
+  const start = parseInt(location.hash.replace('#', ''), 10);
+  if (start >= 1 && start <= slides.length) goTo(start - 1);
+</script>
+
+</body>
+</html>
